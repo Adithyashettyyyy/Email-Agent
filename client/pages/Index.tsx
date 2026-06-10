@@ -42,6 +42,8 @@ The Hiring Team`,
   });
 
   const [smtpConfiguredFromEnv, setSmtpConfiguredFromEnv] = useState(false);
+  const [oauthConfigured, setOauthConfigured] = useState(false);
+  const [useOauth, setUseOauth] = useState(false);
   const [isExtractingEmail, setIsExtractingEmail] = useState(false);
   const [isSending, setIsSending] = useState(false);
 
@@ -56,6 +58,9 @@ The Hiring Team`,
           smtpUser: data.user,
         }));
         setSmtpConfiguredFromEnv(data.passwordConfigured);
+        setOauthConfigured(Boolean((data as any).oauthConfigured));
+        // prefer OAuth if available
+        if ((data as any).oauthConfigured) setUseOauth(true);
       })
       .catch(() => {
         toast.error("Could not load email settings from server");
@@ -181,8 +186,8 @@ The Hiring Team`,
       return;
     }
 
-    if (!smtpConfiguredFromEnv && !formData.smtpPassword.trim()) {
-      toast.error("Add SMTP_PASSWORD to your .env file, or enter an app password");
+    if (!smtpConfiguredFromEnv && !(useOauth && oauthConfigured) && !formData.smtpPassword.trim()) {
+      toast.error("Add SMTP_PASSWORD to your .env file, or enter an app password, or enable OAuth2 if configured on the server.");
       return;
     }
 
@@ -198,6 +203,7 @@ The Hiring Team`,
       if (formData.smtpPassword.trim()) {
         payload.append("smtpPassword", formData.smtpPassword);
       }
+      if (useOauth) payload.append("useOauth", "true");
       payload.append("jdFile", formData.jdFile);
       payload.append("assessmentFile", formData.assessmentFile);
 
@@ -310,6 +316,20 @@ The Hiring Team`,
             ) : (
               <p className="text-green-400/70 text-sm">⏳ Upload resume to extract email</p>
             )}
+          </div>
+
+          {/* SMTP / OAuth Status */}
+          <div className="border border-yellow-500/30 rounded-lg p-4 md:p-6 bg-yellow-500/10 backdrop-blur-sm flex items-center justify-between">
+            <div>
+              <p className="text-yellow-300 text-sm">Mail delivery options</p>
+              <p className="text-yellow-200 text-xs mt-1">
+                SMTP (App Password): {smtpConfiguredFromEnv ? "configured" : "not configured"} • OAuth2: {oauthConfigured ? "configured" : "not configured"}
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <label className="text-xs text-yellow-200">Use OAuth2</label>
+              <input type="checkbox" checked={useOauth} onChange={(e) => setUseOauth(e.target.checked)} className="w-4 h-4" />
+            </div>
           </div>
 
           {/* 2. Attachments */}
