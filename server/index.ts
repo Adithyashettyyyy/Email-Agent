@@ -10,6 +10,7 @@ import { handleDemo } from "./routes/demo";
 import { handleProcessResume } from "./routes/process-resume";
 import { handleSendEmail } from "./routes/send-email";
 import { handleSmtpConfig } from "./routes/smtp-config";
+import { handleScheduleInterview } from "./routes/schedule-interview";
 import multer from "multer";
 
 const upload = multer({ storage: multer.memoryStorage() });
@@ -41,6 +42,8 @@ export function createServer() {
     ]),
     handleSendEmail,
   );
+
+  app.post("/api/schedule-interview", handleScheduleInterview);
 
   return app;
 }

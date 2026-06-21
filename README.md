@@ -1,12 +1,18 @@
 # Resume Email Agent
 
-This project helps send resumes and assessments to candidate email addresses.
+A hiring tool with two features: send JD + assessment emails to candidates, and schedule interviews with a Google Meet link via calendar invite.
 
-## Overview
+## Features
 
-The server sends emails using SMTP credentials (username + password). For Gmail, use an App Password with 2-Step Verification enabled.
+### Email Agent
+Upload a candidate's resume, attach a job description and assessment file, and send them a formatted email. The app auto-extracts the candidate's email from the resume.
 
-This repository contains a small frontend (React + Vite) and an Express server that handles file uploads and sends emails with attachments.
+### Schedule Interview
+Schedule an interview by sending a calendar invite (`.ics`) with a Google Meet link. The candidate and any additional attendees (interviewers, hiring managers) all receive the invite and can add it to their calendar.
+
+- Pick a date, time, and duration
+- Your Google Meet link is saved in the browser and reused for every interview automatically
+- Add as many additional attendees as needed — each gets the calendar invite
 
 ## Environment
 
@@ -41,7 +47,6 @@ npx pnpm@latest install
 ## Run (development)
 
 ```bash
-# start the dev server (client + server integration)
 npx pnpm@latest dev
 ```
 
@@ -52,7 +57,7 @@ pnpm install
 pnpm dev
 ```
 
-The app will be served locally (defaults from Vite setup). The UI uploads resumes and attachments to the server and sends emails using the configured SMTP credentials.
+The app will be served locally (defaults from Vite setup).
 
 ## Build / Production
 
@@ -65,24 +70,42 @@ pnpm start
 
 ## How to use
 
-1. Start the server.
-2. Open the frontend in your browser.
-3. Upload a candidate's resume — the app will attempt to extract the candidate's email from the resume automatically.
-4. Attach the job description and assessment files.
-5. Click send. If the server has `SMTP_USER` and `SMTP_PASSWORD` configured, the email will be sent.
+### Sending a JD + Assessment Email
+
+1. Start the server and open the app.
+2. Click **Email Agent** in the nav bar.
+3. Upload the candidate's resume — the app extracts their email automatically.
+4. Attach the job description (PDF) and assessment file.
+5. Fill in the email subject and body, then click **Send Mail**.
+
+### Scheduling an Interview
+
+1. Click **Schedule Interview** in the nav bar.
+2. Upload the candidate's resume to extract their email.
+3. Pick the interview **date**, **time**, and **duration**.
+4. Enter your **Google Meet link** (saved automatically for future use).
+5. Add any **additional attendees** (interviewers, hiring managers) who should receive the invite.
+6. Review the pre-filled email body and click **Send Interview Invite**.
+
+The candidate and all attendees receive an email with a `.ics` calendar attachment. Opening it adds the interview to their calendar with the Meet link embedded.
+
+## API Routes
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/process-resume` | Extract email from uploaded resume |
+| POST | `/api/send-email` | Send JD + assessment email with attachments |
+| POST | `/api/schedule-interview` | Send calendar invite with Google Meet link |
+| GET | `/api/smtp-config` | Return server-configured SMTP settings |
 
 ## Troubleshooting
 
-- If you see a login rejected error from Gmail, ensure:
-  - You used an App Password (not your normal account password)
-  - 2-Step Verification is enabled on the Gmail account
-  - `SMTP_USER` matches the account the App Password was generated for
-
-- Check server logs for `Error sending email:` messages when troubleshooting.
+- If Gmail rejects the login, ensure you used an App Password (not your account password) and that 2-Step Verification is enabled on the account.
+- The `SMTP_USER` must match the account the App Password was generated for.
+- Check server logs for `Error sending email:` or `Error scheduling interview:` messages.
 
 ## Development Notes
 
-- SMTP credentials are read from environment variables on the server. The frontend will pre-fill `SMTP_USER` if the server exposes it via `/api/smtp-config`.
-- Keep secrets out of client code; all sensitive operations happen server-side.
-
-If you want me to also remove the `pnpm-lock.yaml` changes related to oauth or clean up node_modules, tell me and I'll revert or prune them.
+- SMTP credentials are read from environment variables server-side. The frontend pre-fills `SMTP_USER` if the server exposes it via `/api/smtp-config`.
+- The Google Meet link is stored in the browser's `localStorage` under the key `interview_meet_link` — no server storage needed.
+- All sensitive operations happen server-side; secrets never reach client code.

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { File as FileIcon, Eye } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 import type { SendEmailResponse, SmtpConfigResponse } from "@shared/api";
 
 interface FormData {
@@ -19,6 +20,7 @@ interface FormData {
 const DEFAULT_TO_EMAIL = "your@email.com";
 
 export default function Index() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>({
     resume: null,
     jdFile: null,
@@ -240,10 +242,17 @@ The Hiring Team`,
 
             {/* CTA Buttons */}
             <div className="flex items-center gap-4">
-              <button className="text-cyan-400 text-sm px-4 py-2 transition-colors hover:text-pink-400 border border-cyan-400/30 hover:border-pink-400/30 rounded">
+              <button
+                type="button"
+                className="text-cyan-400 text-sm px-4 py-2 transition-colors border border-cyan-400/30 rounded"
+              >
                 Email Agent
               </button>
-              <button className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors">
+              <button
+                type="button"
+                onClick={() => navigate("/schedule-interview")}
+                className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors"
+              >
                 Schedule Interview
               </button>
             </div>
